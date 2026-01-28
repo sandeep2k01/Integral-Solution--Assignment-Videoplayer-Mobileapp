@@ -2,7 +2,8 @@
 
 A full-stack mobile application demonstrating secure API-first architecture with **React Native** (frontend) and **Flask + MongoDB** (backend).
 
-> **Live Demo**: [https://integral-solution-assignment-videoplayer.onrender.com](https://integral-solution-assignment-videoplayer.onrender.com)
+> **Live Backend API**: [https://integral-solution-assignment-videoplayer.onrender.com](https://integral-solution-assignment-videoplayer.onrender.com)
+> **Final Mobile APK (v1.1.2)**: [Download Latest APK](https://expo.dev/artifacts/eas/765uUvnzQDPLtpJcyVuf5B.apk)
 
 ---
 
@@ -281,7 +282,7 @@ eas build --platform android --profile preview
 - [x] JWT authentication (access + refresh tokens)
 - [x] Password hashing (bcrypt)
 - [x] Auth endpoints (signup, login, me, logout, refresh)
-- [x] Video dashboard with thumbnails (4 videos)
+- [x] Video dashboard with thumbnails (2 videos)
 - [x] **YouTube URLs NEVER exposed to client** ✨
 - [x] Signed playback token system (Option B - Better)
 - [x] Settings screen with user profile and logout
@@ -340,9 +341,9 @@ Copy `.env.example` to `.env` and configure:
 
 2. **API-First Design**: The mobile app is a true "thin client" - it makes API calls and renders data. No filtering, validation, or business logic happens on the client.
 
-3. **Production Ready**: The backend is deployed on Render with proper error handling, rate limiting, and database connection management.
+3. **Production Ready**: The backend is deployed on Render with proper error handling and database connection management. Version 1.0.6 includes optimized connection pooling for high-latency Atlas connections.
 
-4. **Code Organization**: Clear separation between routes, models, and utilities following Flask best practices.
+4. **UI/UX Polish**: Version 1.1.2 of the mobile app includes custom branding, secure playback labels, and informational platform notes to manage expectations regarding YouTube's mobile playback restrictions.
 
 ---
 
