@@ -1,0 +1,21 @@
+{
+    "images": {
+        "icon": {
+            "description": "1024x1024 PNG app icon",
+            "note": "Replace with actual app icon"
+        },
+        "splash": {
+            "description": "Splash screen image",
+            "backgroundColor": "#0A0A0F",
+            "note": "Replace with actual splash screen"
+        },
+        "adaptive-icon": {
+            "description": "1024x1024 PNG for Android adaptive icon",
+            "note": "Replace with actual adaptive icon"
+        },
+        "favicon": {
+            "description": "32x32 or 64x64 PNG favicon for web",
+            "note": "Replace with actual favicon"
+        }
+    }
+}

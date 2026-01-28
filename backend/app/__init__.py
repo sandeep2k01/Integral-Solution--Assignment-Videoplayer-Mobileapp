@@ -1,0 +1,49 @@
+"""
+Flask Application Factory
+Creates and configures the Flask app with all extensions and blueprints.
+"""
+from flask import Flask
+from flask_pymongo import PyMongo
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+# Initialize extensions
+mongo = PyMongo()
+jwt = JWTManager()
+bcrypt = Bcrypt()
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+
+def create_app():
+    """Application factory pattern for Flask."""
+    app = Flask(__name__)
+    
+    # Configuration
+    app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
+    
+    # Initialize extensions with app
+    mongo.init_app(app)
+    jwt.init_app(app)
+    bcrypt.init_app(app)
+    limiter.init_app(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Register blueprints
+    from app.routes.auth import auth_bp
+    from app.routes.video import video_bp
+    
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(video_bp, url_prefix='/api/video')
+    
+    # Health check endpoint
+    @app.route('/api/health')
+    def health_check():
+        return {'status': 'healthy', 'message': 'API is running'}
+    
+    return app
