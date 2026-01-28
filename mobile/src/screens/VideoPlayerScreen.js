@@ -109,9 +109,12 @@ const VideoPlayerScreen = ({ navigation, route }) => {
         }
 
         if (embedUrl) {
+            // Convert regular YouTube embed to nocookie version for better mobile support
+            const nocookieUrl = embedUrl.replace('youtube.com/embed', 'youtube-nocookie.com/embed');
+
             return (
                 <WebView
-                    source={{ uri: `${embedUrl}?autoplay=1&rel=0&modestbranding=1&playsinline=1` }}
+                    source={{ uri: `${nocookieUrl}?autoplay=1&rel=0&modestbranding=1&playsinline=1&fs=1` }}
                     style={styles.webview}
                     originWhitelist={['*']}
                     allowsFullscreenVideo={true}
@@ -119,7 +122,19 @@ const VideoPlayerScreen = ({ navigation, route }) => {
                     mediaPlaybackRequiresUserAction={false}
                     javaScriptEnabled={true}
                     domStorageEnabled={true}
+                    scalesPageToFit={true}
+                    startInLoadingState={true}
                     userAgent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36"
+                    onError={(syntheticEvent) => {
+                        const { nativeEvent } = syntheticEvent;
+                        console.error('WebView error:', nativeEvent);
+                        setError('Failed to load video player');
+                    }}
+                    renderLoading={() => (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={colors.accent.primary} />
+                        </View>
+                    )}
                 />
             );
         }

@@ -67,32 +67,32 @@ class Video:
     def get_sample_videos():
         """
         Return sample video data for seeding the database.
-        These are real YouTube video IDs for testing.
+        These are embed-friendly YouTube videos verified for mobile playback.
         """
         return [
             {
-                'title': 'How Startups Fail',
-                'description': 'Lessons from real founders about common startup mistakes and how to avoid them.',
-                'youtube_id': 'bNpx7gpSqbY'
+                'title': 'The Power of Believing You Can Improve',
+                'description': 'Carol Dweck talks about the growth mindset and how our beliefs about learning shape our success.',
+                'youtube_id': '_X0mgOOSpLU'
             },
             {
-                'title': 'The Future of AI',
-                'description': 'An in-depth look at artificial intelligence and its impact on society.',
-                'youtube_id': '5MgBikgcWnY'
+                'title': 'How Great Leaders Inspire Action',
+                'description': 'Simon Sinek explains the golden circle and why some leaders and organizations are more innovative.',
+                'youtube_id': 'qp0HIF3SfI4'
             },
             {
-                'title': 'Building Great Products',
-                'description': 'Product management insights from industry experts.',
-                'youtube_id': 'C27RVio2rOs'
+                'title': 'Your Body Language Shapes Who You Are',
+                'description': 'Amy Cuddy shows how power posing can change your mind, body, and life.',
+                'youtube_id': 'Ks-_Mh1QhMc'
             },
             {
-                'title': 'Startup Funding Explained',
-                'description': 'Understanding venture capital, angel investors, and funding rounds.',
-                'youtube_id': '677ZtSMr4-4'
+                'title': 'The Happy Secret to Better Work',
+                'description': 'Shawn Achor reveals how positive psychology can boost happiness and productivity.',
+                'youtube_id': 'fLJsdqxnZb0'
             },
             {
-                'title': 'Remote Work Culture',
-                'description': 'How to build and maintain a strong remote work culture.',
-                'youtube_id': 'x6fIseKzzH0'
+                'title': 'The Skill of Self Confidence',
+                'description': 'Dr. Ivan Joseph explains how self-confidence is developed through practice and persistence.',
+                'youtube_id': 'w-HYZv6HzAs'
             }
         ]
