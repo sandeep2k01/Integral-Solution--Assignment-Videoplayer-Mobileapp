@@ -1,6 +1,7 @@
 """
 Entry point for the Flask application.
 Run with: python run.py
+Updated: 2026-01-28
 """
 from app import create_app
 
