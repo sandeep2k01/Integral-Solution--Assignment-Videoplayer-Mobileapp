@@ -19,7 +19,6 @@ auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/signup', methods=['POST'])
-@limiter.limit("5 per hour")
 def signup():
     """
     Register a new user.
@@ -77,7 +76,6 @@ def signup():
 
 
 @auth_bp.route('/login', methods=['POST'])
-@limiter.limit("10 per minute")
 def login():
     """
     Authenticate user and return tokens.
