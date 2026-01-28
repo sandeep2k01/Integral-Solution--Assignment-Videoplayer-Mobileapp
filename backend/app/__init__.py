@@ -36,10 +36,18 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
     
     # Initialize extensions with app
-    mongo.init_app(app)
-    jwt.init_app(app)
-    bcrypt.init_app(app)
-    limiter.init_app(app)
+    try:
+        mongo.init_app(app)
+    except Exception as e:
+        app.logger.error(f"Failed to initialize MongoDB: {e}")
+    
+    try:
+        jwt.init_app(app)
+        bcrypt.init_app(app)
+        limiter.init_app(app)
+    except Exception as e:
+        app.logger.error(f"Failed to initialize Other Extensions: {e}")
+
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
