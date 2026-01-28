@@ -21,31 +21,31 @@ limiter = Limiter(key_func=get_remote_address, enabled=False)
 
 def create_app():
     """Application factory pattern for Flask."""
-    app = Flask(__name__)
+    flask_app = Flask(__name__)
     
     # Configuration
-    app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
-    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
+    flask_app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
+    flask_app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
+    flask_app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
+    flask_app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
+    flask_app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
     
     # Initialize extensions with app
-    mongo.init_app(app)
-    jwt.init_app(app)
-    bcrypt.init_app(app)
-    # limiter.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    mongo.init_app(flask_app)
+    jwt.init_app(flask_app)
+    bcrypt.init_app(flask_app)
+    # limiter.init_app(flask_app)
+    CORS(flask_app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.video import video_bp
     
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(video_bp, url_prefix='/api/video')
+    flask_app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    flask_app.register_blueprint(video_bp, url_prefix='/api/video')
     
     # Global Error Handler
-    @app.errorhandler(Exception)
+    @flask_app.errorhandler(Exception)
     def handle_exception(e):
         import traceback
         tb = traceback.format_exc()
@@ -56,13 +56,13 @@ def create_app():
         return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__, 'traceback': tb}), 500
 
     # Root route
-    @app.route('/')
+    @flask_app.route('/')
     def index():
-        return "Backend is Live - Version 1.0.2"
+        return "Backend is Live - Version 1.0.3"
 
     # Health check endpoint
-    @app.route('/api/health')
+    @flask_app.route('/api/health')
     def health_check():
-        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.1'}
+        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.3'}
     
-    return app
+    return flask_app
