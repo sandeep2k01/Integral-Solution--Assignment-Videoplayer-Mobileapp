@@ -3,7 +3,7 @@
 A full-stack mobile application demonstrating secure API-first architecture with **React Native** (frontend) and **Flask + MongoDB** (backend).
 
 > **Live Backend API**: [https://integral-solution-assignment-videoplayer.onrender.com](https://integral-solution-assignment-videoplayer.onrender.com)
-> **Final Mobile APK (v1.1.2)**: [Download Latest APK](https://expo.dev/artifacts/eas/765uUvnzQDPLtpJcyVuf5B.apk)
+> **Final Mobile APK (v1.1.3)**: [Download Latest APK](https://expo.dev/artifacts/eas/i3bTwdvUPXVw3t78f.apk)
 
 ---
 
@@ -328,7 +328,7 @@ Copy `.env.example` to `.env` and configure:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `MONGO_URI` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/db` |
+| `MONGO_URI` | MongoDB connection string | `mongodb+srv://<username>:<password>@cluster.mongodb.net/yourdb` |
 | `JWT_SECRET_KEY` | JWT signing secret | `your-256-bit-secret` |
 | `SECRET_KEY` | Flask app secret | `your-flask-secret` |
 | `PLAYBACK_SECRET` | Token signing secret | `your-playback-secret` |
