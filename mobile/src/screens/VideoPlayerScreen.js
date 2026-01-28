@@ -86,6 +86,30 @@ const VideoPlayerScreen = ({ navigation, route }) => {
         }
     };
 
+
+    const openInYouTube = async () => {
+        if (!embedUrl) return;
+
+        try {
+            // Extract video ID from embed URL (still using secure token flow)
+            const videoId = embedUrl.match(/embed\/([^?]+)/)?.[1];
+            if (videoId) {
+                const { Linking } = require('react-native');
+                // Try YouTube app first, fallback to browser
+                const youtubeUrl = `vnd.youtube://${videoId}`;
+                const browserUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+                const canOpen = await Linking.canOpenURL(youtubeUrl);
+                const urlToOpen = canOpen ? youtubeUrl : browserUrl;
+
+                await Linking.openURL(urlToOpen);
+            }
+        } catch (err) {
+            console.error('Failed to open YouTube:', err);
+        }
+    };
+
+
     const renderPlayer = () => {
         if (isLoading) {
             return (
@@ -99,10 +123,14 @@ const VideoPlayerScreen = ({ navigation, route }) => {
         if (error) {
             return (
                 <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle-outline" size={48} color={colors.status.error} />
+                    <Ionicons name="logo-youtube" size={64} color={colors.status.error} />
                     <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity style={styles.youtubeButton} onPress={openInYouTube}>
+                        <Ionicons name="logo-youtube" size={20} color="#fff" />
+                        <Text style={styles.youtubeButtonText}>Watch on YouTube</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.retryButton} onPress={loadVideo}>
-                        <Text style={styles.retryText}>Try Again</Text>
+                        <Text style={styles.retryText}>Try Again in App</Text>
                     </TouchableOpacity>
                 </View>
             );
@@ -128,13 +156,21 @@ const VideoPlayerScreen = ({ navigation, route }) => {
                     onError={(syntheticEvent) => {
                         const { nativeEvent } = syntheticEvent;
                         console.error('WebView error:', nativeEvent);
-                        setError('Failed to load video player');
+                        // YouTube often blocks WebView playback - offer fallback
+                        setError('YouTube restricts playback in mobile apps. Tap below to watch in YouTube.');
                     }}
                     renderLoading={() => (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color={colors.accent.primary} />
                         </View>
                     )}
+                    onMessage={(event) => {
+                        // Listen for YouTube player errors
+                        const message = event.nativeEvent.data;
+                        if (message.includes('error') || message.includes('153')) {
+                            setError('YouTube restricts playback in mobile apps. Tap below to watch in YouTube.');
+                        }
+                    }}
                 />
             );
         }
@@ -260,9 +296,25 @@ const styles = StyleSheet.create({
         color: colors.text.secondary,
         textAlign: 'center',
         marginTop: spacing.md,
+        marginBottom: spacing.lg,
+    },
+    youtubeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+        paddingHorizontal: spacing.xl,
+        paddingVertical: spacing.md,
+        backgroundColor: '#FF0000',
+        borderRadius: borderRadius.md,
+        marginBottom: spacing.sm,
+    },
+    youtubeButtonText: {
+        ...typography.button,
+        color: '#FFFFFF',
+        marginLeft: spacing.sm,
     },
     retryButton: {
-        marginTop: spacing.lg,
+        marginTop: spacing.sm,
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm,
         backgroundColor: colors.accent.primary,
