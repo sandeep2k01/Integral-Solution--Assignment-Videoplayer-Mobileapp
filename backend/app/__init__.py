@@ -24,30 +24,17 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration
-    # Add a shorter timeout and SSL bypass for restricted environments
-    mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
-    if '?' in mongo_uri:
-        app.config['MONGO_URI'] = f"{mongo_uri}&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
-    else:
-        app.config['MONGO_URI'] = f"{mongo_uri}?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
+    app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
     
     # Initialize extensions with app
-    try:
-        mongo.init_app(app)
-    except Exception as e:
-        app.logger.error(f"Failed to initialize MongoDB: {e}")
-    
-    try:
-        jwt.init_app(app)
-        bcrypt.init_app(app)
-        limiter.init_app(app)
-    except Exception as e:
-        app.logger.error(f"Failed to initialize Other Extensions: {e}")
-
+    mongo.init_app(app)
+    jwt.init_app(app)
+    bcrypt.init_app(app)
+    limiter.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
