@@ -56,6 +56,6 @@ def create_app():
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
-        return {'status': 'healthy', 'message': 'API is running'}
+        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.1'}
     
     return app
