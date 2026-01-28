@@ -163,7 +163,8 @@ export const signup = async (name, email, password) => {
 
         return response.data;
     } catch (error) {
-        throw error.response?.data || { message: 'Network error' };
+        if (error.response && error.response.data) throw error.response.data;
+        throw { message: 'Network error' };
     }
 };
 
@@ -185,7 +186,8 @@ export const login = async (email, password) => {
 
         return response.data;
     } catch (error) {
-        throw error.response?.data || { message: 'Network error' };
+        if (error.response && error.response.data) throw error.response.data;
+        throw { message: 'Network error' };
     }
 };
 
