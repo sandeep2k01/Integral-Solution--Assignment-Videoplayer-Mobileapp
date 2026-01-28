@@ -28,10 +28,11 @@ def get_videos():
     """
     try:
         page = int(request.args.get('page', 1))
-        limit = int(request.args.get('limit', 10))
+        # Default and max limit is 4 videos as per assignment requirement
+        limit = min(int(request.args.get('limit', 4)), 4)
         skip = (page - 1) * limit
         
-        # Fetch active videos with pagination
+        # Fetch active videos with pagination (max 4 videos)
         videos_cursor = mongo.db.videos.find({'is_active': True}).skip(skip).limit(limit)
         videos = []
         

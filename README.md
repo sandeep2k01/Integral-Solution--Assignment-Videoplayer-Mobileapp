@@ -2,239 +2,350 @@
 
 A full-stack mobile application demonstrating secure API-first architecture with **React Native** (frontend) and **Flask + MongoDB** (backend).
 
+> **Live Demo**: [https://integral-solution-assignment-videoplayer.onrender.com](https://integral-solution-assignment-videoplayer.onrender.com)
+
+---
+
 ## 🎯 Assignment Overview
 
-This project implements a "thin client" architecture where:
-- **Mobile App**: Only handles UI/UX - no business logic
+This project implements a **"thin client" architecture** where:
+- **Mobile App**: Only handles UI/UX - **no business logic**
 - **Backend API**: Handles all authentication, data, and video security
-- **Key Feature**: YouTube URLs are **never exposed** to the client
+- **Key Security Feature**: YouTube URLs are **NEVER exposed** to the client
+
+### Architecture Diagram
+
+```
+┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
+│  React Native   │  HTTP   │   Flask API     │  Query  │   MongoDB       │
+│  Mobile App     │ ◄─────► │   (Backend)     │ ◄─────► │   Atlas         │
+│                 │   JWT   │                 │         │                 │
+└─────────────────┘         └─────────────────┘         └─────────────────┘
+                                    │
+                                    │ Secure Token
+                                    ▼
+                            ┌─────────────────┐
+                            │   YouTube       │
+                            │   (Hidden)      │
+                            └─────────────────┘
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
-├── backend/                 # Flask API
+├── backend/                 # Flask API Server
 │   ├── app/
-│   │   ├── __init__.py     # App factory
-│   │   ├── config.py       # Configuration
-│   │   ├── models/         # MongoDB models
-│   │   │   ├── user.py
-│   │   │   └── video.py
-│   │   ├── routes/         # API endpoints
-│   │   │   ├── auth.py
-│   │   │   └── video.py
-│   │   └── utils/          # Helpers
-│   │       └── helpers.py
+│   │   ├── __init__.py     # App factory + extensions
+│   │   ├── routes/
+│   │   │   ├── auth.py     # Authentication endpoints
+│   │   │   └── video.py    # Video streaming endpoints
+│   │   ├── models/
+│   │   │   ├── user.py     # User model
+│   │   │   └── video.py    # Video model
+│   │   └── utils/
+│   │       └── helpers.py  # Token generation/validation
 │   ├── requirements.txt
-│   ├── run.py
-│   └── .env
+│   ├── run.py              # Entry point
+│   └── .env.example        # Environment template
 │
 └── mobile/                  # React Native (Expo)
-    ├── App.js
+    ├── App.js              # Root component
     ├── src/
-    │   ├── context/        # Auth context
+    │   ├── context/        # Auth context (JWT storage)
     │   ├── screens/        # UI screens
-    │   ├── services/       # API client
+    │   ├── services/       # API client (Axios)
     │   └── theme/          # Design tokens
-    ├── package.json
-    └── app.json
+    ├── app.json
+    └── package.json
 ```
+
+---
 
 ## 🔐 Security Architecture
 
-### The "Twist" - Secure Video Playback
+### The "Twist" - Secure Video Playback Flow
 
-The client **never** sees raw YouTube URLs. Instead:
-
-1. **Dashboard** returns video metadata (title, description, thumbnail) without YouTube IDs
-2. **Stream Request** generates a signed, time-limited playback token
-3. **Play Request** verifies the token and returns the embed URL
-4. **WebView** displays the video using the verified URL
+The client **NEVER** sees raw YouTube URLs. The secure flow:
 
 ```
-Mobile App                    Backend API
-     |                            |
-     |-- GET /video/dashboard --> |  (Returns video list without YouTube IDs)
-     |<-- [id, title, thumb] -----|
-     |                            |
-     |-- GET /video/{id}/stream ->|  (Generates playback token)
-     |<-- playback_token ---------|
-     |                            |
-     |-- GET /play?token=xxx ---->|  (Verifies token, returns embed URL)
-     |<-- embed_url --------------|
-     |                            |
-     |-- [WebView loads embed] -->|
+Step 1: Dashboard Request
+────────────────────────
+Mobile App ──► GET /api/video/dashboard ──► Backend
+Mobile App ◄── [videos: {id, title, thumbnail}] ◄── Backend
+                    ↑
+                    │ (NO youtube_id exposed!)
+
+Step 2: Stream Token Request  
+───────────────────────────
+Mobile App ──► GET /api/video/{id}/stream ──► Backend
+                                              │
+                                              ▼
+                                        [Generates signed token
+                                         with user_id + video_id
+                                         + expiry timestamp]
+                                              │
+Mobile App ◄── {playback_token: "abc123..."} ◄┘
+
+Step 3: Play Request (Token Verification)
+─────────────────────────────────────────
+Mobile App ──► GET /api/video/play?token=abc123 ──► Backend
+                                                    │
+                                                    ▼
+                                              [Verifies signature,
+                                               checks expiry,
+                                               looks up youtube_id]
+                                                    │
+Mobile App ◄── {embed_url: "youtube.com/embed/xxx"} ◄┘
+       │
+       ▼
+[WebView loads embed URL]
 ```
 
-## 🚀 Getting Started
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
 
-- Python 3.9+
-- Node.js 18+
-- MongoDB (local or Atlas)
-- Expo CLI
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Python | 3.9+ | Backend runtime |
+| Node.js | 18+ | Mobile development |
+| MongoDB | Atlas or Local | Database |
+| Expo CLI | Latest | Mobile build |
 
-### Backend Setup
+### 1. Backend Setup
 
 ```bash
+# Navigate to backend
 cd backend
 
-# Create virtual environment
+# Create and activate virtual environment
 python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
+
+# Windows:
+venv\Scripts\activate
+
+# macOS/Linux:
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure environment
-# Edit .env with your MongoDB URI
+# Configure environment variables
+cp .env.example .env
+# Edit .env with your MongoDB URI and secrets
 
 # Run the server
 python run.py
 ```
 
-The API will be available at `http://localhost:5000`
+**Backend will be available at**: `http://localhost:5000`
 
-### Seed Sample Videos
+### 2. Seed Sample Videos
 
 ```bash
-# Using curl or Postman
-POST http://localhost:5000/api/video/seed
+# Using curl:
+curl -X POST http://localhost:5000/api/video/seed
+
+# Or using PowerShell:
+Invoke-WebRequest -Uri http://localhost:5000/api/video/seed -Method Post
 ```
 
-### Mobile Setup
+### 3. Mobile Setup
 
 ```bash
+# Navigate to mobile
 cd mobile
 
 # Install dependencies
 npm install
 
-# Start Expo
+# Start Expo development server
 npx expo start
 ```
 
-### Configure API URL
+### 4. Configure API URL
 
-Edit `mobile/src/services/api.js`:
+For local development, edit `mobile/src/services/api.js`:
 
 ```javascript
-// For Android Emulator
+// Android Emulator
 const API_BASE_URL = 'http://10.0.2.2:5000/api';
 
-// For iOS Simulator
+// iOS Simulator
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// For Physical Device (use your computer's IP)
-const API_BASE_URL = 'http://YOUR_IP:5000/api';
+// Physical Device (use your computer's local IP)
+const API_BASE_URL = 'http://192.168.1.XXX:5000/api';
+
+// Production (Render deployment)
+const API_BASE_URL = 'https://your-app.onrender.com/api';
 ```
 
-## 🌟 Top 10% Candidate Bonus Features
+### 5. Build APK (Optional)
 
-This project includes advanced features that demonstrate production-grade quality:
+```bash
+cd mobile
 
-1. **Refresh Tokens**: Implemented with JWT rotation. Access tokens are short-lived, while refresh tokens reside securely on the device, allowing for long-running sessions without compromising security.
-2. **Token Expiry Handling**: Frontend automatically intercepts 401 errors and attempts to refresh the access token silently without interrupting the user.
-3. **Login Rate Limiting**: Uses `Flask-Limiter` to protect against brute-force attacks on the `/login` and `/signup` endpoints.
-4. **Pagination-Ready Dashboard**: The video dashboard supports `page` and `limit` parameters, returning total counts and page metadata for scalable video discovery.
-5. **Video Watch Tracking**: An automated tracking endpoint (`/api/video/track`) records user playback progress every 30 seconds, stored securely in MongoDB.
-6. **Robust Error Feedback**: Comprehensive input validation and UI alerts for network failures or invalid credentials.
+# Configure EAS Build
+eas build:configure
 
-## 📡 API Endpoints
+# Build for Android
+eas build --platform android --profile preview
+```
 
-### Authentication
+---
+
+## 📡 API Endpoints Reference
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Rate Limit |
+|--------|----------|-------------|------------|
+| POST | `/api/auth/signup` | Register new user | 5/min, 20/hr |
+| POST | `/api/auth/login` | Authenticate user | 10/min, 50/hr |
+| POST | `/api/auth/refresh` | Refresh access token | Default |
+| GET | `/api/auth/me` | Get user profile | Default |
+| POST | `/api/auth/logout` | Logout user | Default |
+
+### Video Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/video/dashboard` | List videos (max 4) | ✅ JWT |
+| GET | `/api/video/{id}/stream` | Get playback token | ✅ JWT |
+| GET | `/api/video/play?token=xxx` | Get embed URL | Token |
+| POST | `/api/video/track` | Track watch progress | ✅ JWT |
+| POST | `/api/video/seed` | Seed database | None |
+
+### Health Check
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST   | `/api/auth/signup` | Register new user (Rate limited) |
-| POST   | `/api/auth/login` | Login user (Rate limited) |
-| POST   | `/api/auth/refresh` | Refresh access token |
-| GET    | `/api/auth/me` | Get user profile |
-| POST   | `/api/auth/logout` | Logout user |
+| GET | `/api/health` | API status check |
 
-### Videos
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET    | `/api/video/dashboard` | List videos (Paginated) |
-| GET    | `/api/video/{id}/stream` | Get playback token |
-| GET    | `/api/video/play?token=xxx` | Proxy embed URL |
-| POST   | `/api/video/track` | Track watch progress |
-| POST   | `/api/video/seed` | Seed database |
+---
 
 ## 🎨 Mobile Screens
 
-1. **Splash Screen** - Animated logo with auth check
-2. **Login Screen** - Email/password authentication
-3. **Signup Screen** - User registration with validation
-4. **Dashboard** - Video grid with thumbnails
-5. **Video Player** - Secure playback with WebView
-6. **Settings** - User profile and logout
+| Screen | Description |
+|--------|-------------|
+| **Splash** | Animated logo with auth state check |
+| **Login** | Email/password authentication |
+| **Signup** | User registration with validation |
+| **Dashboard** | Video grid (4 videos from API) |
+| **Video Player** | Secure playback with WebView |
+| **Settings** | User profile + logout button |
+
+---
 
 ## 📦 Database Models
 
-### User
+### User Collection
+
 ```javascript
 {
   _id: ObjectId,
   name: String,
-  email: String,
-  password: String (hashed),
+  email: String,        // unique, lowercase
+  password: String,     // bcrypt hashed
   created_at: DateTime
 }
 ```
 
-### Video
+### Video Collection
+
 ```javascript
 {
   _id: ObjectId,
   title: String,
   description: String,
-  youtube_id: String,  // Never exposed to client
+  youtube_id: String,   // ⚠️ NEVER exposed to client
   thumbnail_url: String,
   is_active: Boolean,
   created_at: DateTime
 }
 ```
 
+---
+
+## ✅ Assignment Requirements Checklist
+
+### Core Requirements
+
+- [x] React Native thin client (no business logic)
+- [x] Flask backend with MongoDB
+- [x] JWT authentication (access + refresh tokens)
+- [x] Password hashing (bcrypt)
+- [x] Auth endpoints (signup, login, me, logout, refresh)
+- [x] Video dashboard with thumbnails (4 videos)
+- [x] **YouTube URLs NEVER exposed to client** ✨
+- [x] Signed playback token system (Option B - Better)
+- [x] Settings screen with user profile and logout
+
+### Bonus Features (Top 10% Candidate)
+
+- [x] **Refresh Tokens**: JWT rotation for long sessions
+- [x] **Token Expiry Handling**: Auto-refresh on 401
+- [x] **Rate Limiting**: Protects auth endpoints (Flask-Limiter)
+- [x] **Pagination-Ready**: Dashboard supports `page` & `limit`
+- [x] **Watch Progress Tracking**: `/api/video/track` endpoint
+- [x] **Live Deployment**: Hosted on Render
+- [x] **Basic Logging**: Error tracking with tracebacks
+
+---
+
 ## 🛠 Tech Stack
 
 ### Backend
-- **Framework**: Flask 3.0
-- **Database**: MongoDB Atlas (Cloud)
-- **Auth**: JWT with Refresh Tokens
-- **Security**: Flask-Limiter, Bcrypt
-- **CORS**: Flask-CORS
+| Technology | Purpose |
+|------------|---------|
+| Flask 3.0 | Web framework |
+| Flask-PyMongo | MongoDB integration |
+| Flask-JWT-Extended | JWT authentication |
+| Flask-Bcrypt | Password hashing |
+| Flask-Limiter | Rate limiting |
+| Flask-CORS | Cross-origin requests |
 
 ### Mobile
-- **Framework**: React Native (Expo SDK 54)
-- **Navigation**: React Navigation (Native Stack)
-- **HTTP Client**: Axios with Interceptors
-- **Secure Storage**: Expo SecureStore
-- **Video**: React Native WebView (Modified for Direct Streaming)
+| Technology | Purpose |
+|------------|---------|
+| React Native (Expo SDK 52) | Cross-platform framework |
+| React Navigation | Screen navigation |
+| Axios | HTTP client with interceptors |
+| Expo SecureStore | Secure token storage |
+| React Native WebView | Video playback |
 
-## 📝 Assignment Requirements Checklist
+---
 
-- [x] React Native thin client
-- [x] Flask backend with MongoDB
-- [x] JWT authentication
-- [x] Password hashing (bcrypt)
-- [x] Auth endpoints (signup, login, me, logout)
-- [x] Video dashboard with thumbnails
-- [x] **YouTube URLs never exposed to client**
-- [x] Playback token system (Option B - Better)
-- [x] Settings screen with logout
-- [x] **Bonus**: Refresh tokens & session rotation
-- [x] **Bonus**: Token expiry handling
-- [x] **Bonus**: Rate limiting login
-- [x] **Bonus**: Pagination-ready dashboard
-- [x] **Bonus**: Video watch tracking endpoint
+## 🔧 Environment Variables
 
-## 🤝 Contributing
+Copy `.env.example` to `.env` and configure:
 
-This is an assignment project for Integral Solution.
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `MONGO_URI` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/db` |
+| `JWT_SECRET_KEY` | JWT signing secret | `your-256-bit-secret` |
+| `SECRET_KEY` | Flask app secret | `your-flask-secret` |
+| `PLAYBACK_SECRET` | Token signing secret | `your-playback-secret` |
+
+---
+
+## 📝 Notes for Evaluators
+
+1. **Security First**: The entire video flow is designed so that YouTube IDs are never exposed to the mobile client. All video access goes through signed, time-limited tokens.
+
+2. **API-First Design**: The mobile app is a true "thin client" - it makes API calls and renders data. No filtering, validation, or business logic happens on the client.
+
+3. **Production Ready**: The backend is deployed on Render with proper error handling, rate limiting, and database connection management.
+
+4. **Code Organization**: Clear separation between routes, models, and utilities following Flask best practices.
+
+---
 
 ## 📄 License
 
-MIT License
+MIT License - Integral Solution Assignment

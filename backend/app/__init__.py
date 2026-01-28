@@ -16,8 +16,8 @@ mongo = PyMongo()
 jwt = JWTManager()
 bcrypt = Bcrypt()
 # limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
-# Disabling limiter temporarily for production stability
-limiter = Limiter(key_func=get_remote_address, enabled=False)
+# Re-enabled rate limiter for production - protects auth endpoints
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "100 per hour"])
 
 def create_app():
     """Application factory pattern for Flask."""
@@ -40,7 +40,7 @@ def create_app():
     mongo.init_app(flask_app)
     jwt.init_app(flask_app)
     bcrypt.init_app(flask_app)
-    # limiter.init_app(flask_app)
+    limiter.init_app(flask_app)
     CORS(flask_app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
