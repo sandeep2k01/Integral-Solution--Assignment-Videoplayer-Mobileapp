@@ -65,10 +65,10 @@ const DashboardScreen = ({ navigation }) => {
         navigation.navigate('VideoPlayer', { video });
     };
 
-    const renderVideoCard = ({ item, index }) => (
+    const renderVideoCard = ({ item }) => (
         <TouchableOpacity
-            style={[styles.videoCard, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}
-            activeOpacity={0.85}
+            style={styles.videoCard}
+            activeOpacity={0.9}
             onPress={() => handleVideoPress(item)}
         >
             <View style={styles.thumbnailContainer}>
@@ -78,18 +78,20 @@ const DashboardScreen = ({ navigation }) => {
                     resizeMode="cover"
                 />
                 <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.8)']}
+                    colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
                     style={styles.thumbnailOverlay}
                 />
-                <View style={styles.playButton}>
-                    <Ionicons name="play" size={24} color={colors.text.primary} />
+
+                <View style={styles.videoOverlayInfo}>
+                    <Text style={styles.videoTitleOverlay} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.videoDescriptionOverlay} numberOfLines={1}>
+                        {item.description}
+                    </Text>
                 </View>
-            </View>
-            <View style={styles.videoInfo}>
-                <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
-                <Text style={styles.videoDescription} numberOfLines={2}>
-                    {item.description}
-                </Text>
+
+                <View style={styles.playButton}>
+                    <Ionicons name="play" size={28} color={colors.text.primary} />
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -97,8 +99,7 @@ const DashboardScreen = ({ navigation }) => {
     const renderHeader = () => (
         <View style={styles.header}>
             <View>
-                <Text style={styles.greeting}>Welcome back,</Text>
-                <Text style={styles.userName}>{user?.name || 'User'}</Text>
+                <Text style={styles.greeting}>Hi, {user?.name?.split(' ')[0] || 'User'}</Text>
             </View>
             <TouchableOpacity
                 style={styles.settingsButton}
@@ -106,6 +107,12 @@ const DashboardScreen = ({ navigation }) => {
             >
                 <Ionicons name="settings-outline" size={24} color={colors.text.primary} />
             </TouchableOpacity>
+        </View>
+    );
+
+    const renderTitle = () => (
+        <View style={styles.titleContainer}>
+            <Text style={styles.sectionTitle}>Dashboard</Text>
         </View>
     );
 
@@ -156,7 +163,8 @@ const DashboardScreen = ({ navigation }) => {
                     data={videos}
                     renderItem={renderVideoCard}
                     keyExtractor={(item) => item.id}
-                    numColumns={2}
+                    ListHeaderComponent={renderTitle}
+                    numColumns={1}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={renderEmpty}
@@ -219,28 +227,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContent: {
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: spacing.lg,
         paddingBottom: spacing.xl,
     },
+    titleContainer: {
+        paddingBottom: spacing.lg,
+    },
+    sectionTitle: {
+        ...typography.h1,
+        color: colors.text.primary,
+        fontSize: 28,
+    },
     videoCard: {
-        flex: 1,
+        width: '100%',
         backgroundColor: colors.background.card,
-        borderRadius: borderRadius.lg,
-        marginBottom: spacing.md,
+        borderRadius: borderRadius.xl,
+        marginBottom: spacing.lg,
         overflow: 'hidden',
-        ...shadows.medium,
-    },
-    cardLeft: {
-        marginRight: spacing.xs,
-        marginLeft: spacing.xs,
-    },
-    cardRight: {
-        marginLeft: spacing.xs,
-        marginRight: spacing.xs,
+        ...shadows.large,
     },
     thumbnailContainer: {
         position: 'relative',
-        aspectRatio: 16 / 9,
+        height: 200,
     },
     thumbnail: {
         width: '100%',
@@ -248,36 +256,41 @@ const styles = StyleSheet.create({
     },
     thumbnailOverlay: {
         position: 'absolute',
-        bottom: 0,
+        top: 0,
         left: 0,
         right: 0,
-        height: '50%',
+        bottom: 0,
+    },
+    videoOverlayInfo: {
+        position: 'absolute',
+        top: spacing.md,
+        left: spacing.md,
+        right: spacing.md,
+    },
+    videoTitleOverlay: {
+        ...typography.h3,
+        color: '#FFFFFF',
+        fontWeight: '700',
+        marginBottom: 2,
+    },
+    videoDescriptionOverlay: {
+        ...typography.bodySmall,
+        color: 'rgba(255, 255, 255, 0.8)',
     },
     playButton: {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        marginTop: -20,
-        marginLeft: -20,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(108, 92, 231, 0.9)',
+        marginTop: -25,
+        marginLeft: -25,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    videoInfo: {
-        padding: spacing.sm,
-    },
-    videoTitle: {
-        ...typography.bodySmall,
-        fontWeight: '600',
-        color: colors.text.primary,
-        marginBottom: spacing.xs,
-    },
-    videoDescription: {
-        ...typography.caption,
-        color: colors.text.tertiary,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     emptyContainer: {
         flex: 1,
