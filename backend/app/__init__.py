@@ -24,12 +24,12 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration
-    # Add a shorter timeout for DB connection to avoid hanging in production
+    # Add a shorter timeout and SSL bypass for restricted environments
     mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
     if '?' in mongo_uri:
-        app.config['MONGO_URI'] = f"{mongo_uri}&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000"
+        app.config['MONGO_URI'] = f"{mongo_uri}&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
     else:
-        app.config['MONGO_URI'] = f"{mongo_uri}?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000"
+        app.config['MONGO_URI'] = f"{mongo_uri}?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
