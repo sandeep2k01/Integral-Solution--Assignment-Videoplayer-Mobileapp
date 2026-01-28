@@ -20,7 +20,8 @@
     },
     "android": {
       "package": "com.integralsolution.videoapp",
-      "versionCode": 6
+      "versionCode": 7,
+      "versionName": "1.1.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
