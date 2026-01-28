@@ -126,9 +126,10 @@ const VideoPlayerScreen = ({ navigation, route }) => {
                     <Ionicons name="logo-youtube" size={64} color={colors.status.error} />
                     <Text style={styles.errorText}>{error}</Text>
                     <TouchableOpacity style={styles.youtubeButton} onPress={openInYouTube}>
-                        <Ionicons name="logo-youtube" size={20} color="#fff" />
-                        <Text style={styles.youtubeButtonText}>Watch on YouTube</Text>
+                        <Ionicons name="shield-checkmark" size={20} color="#fff" />
+                        <Text style={styles.youtubeButtonText}>Open video securely</Text>
                     </TouchableOpacity>
+                    <Text style={styles.platformSubtext}>Playback may open YouTube due to platform restrictions.</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={loadVideo}>
                         <Text style={styles.retryText}>Try Again in App</Text>
                     </TouchableOpacity>
@@ -157,7 +158,7 @@ const VideoPlayerScreen = ({ navigation, route }) => {
                         const { nativeEvent } = syntheticEvent;
                         console.error('WebView error:', nativeEvent);
                         // YouTube often blocks WebView playback - offer fallback
-                        setError('YouTube restricts playback in mobile apps. Tap below to watch in YouTube.');
+                        setError('YouTube restricts playback in mobile apps. Tap below to open securely.');
                     }}
                     renderLoading={() => (
                         <View style={styles.loadingContainer}>
@@ -168,7 +169,7 @@ const VideoPlayerScreen = ({ navigation, route }) => {
                         // Listen for YouTube player errors
                         const message = event.nativeEvent.data;
                         if (message.includes('error') || message.includes('153')) {
-                            setError('YouTube restricts playback in mobile apps. Tap below to watch in YouTube.');
+                            setError('YouTube restricts playback in mobile apps. Tap below to open securely.');
                         }
                     }}
                 />
@@ -363,6 +364,14 @@ const styles = StyleSheet.create({
         ...typography.caption,
         color: colors.text.tertiary,
         marginLeft: spacing.xs,
+    },
+    platformSubtext: {
+        ...typography.caption,
+        color: colors.text.tertiary,
+        fontSize: 10,
+        textAlign: 'center',
+        marginTop: spacing.xs,
+        fontStyle: 'italic',
     },
 });
 

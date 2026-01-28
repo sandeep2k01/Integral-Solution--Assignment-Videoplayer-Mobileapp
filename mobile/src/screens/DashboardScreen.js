@@ -160,6 +160,11 @@ const DashboardScreen = ({ navigation }) => {
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={renderEmpty}
+                    ListFooterComponent={() => (
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>Curated content. More videos coming soon.</Text>
+                        </View>
+                    )}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefreshing}
@@ -318,6 +323,16 @@ const styles = StyleSheet.create({
     retryText: {
         ...typography.button,
         color: colors.text.primary,
+    },
+    footer: {
+        paddingVertical: spacing.xl,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    footerText: {
+        ...typography.caption,
+        color: colors.text.tertiary,
+        fontStyle: 'italic',
     },
 });
 
