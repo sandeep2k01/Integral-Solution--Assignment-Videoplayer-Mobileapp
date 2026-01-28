@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt
 )
-from app import mongo, bcrypt, limiter
+from app import mongo, bcrypt
 from app.models.user import User
 from app.utils.helpers import format_response
 

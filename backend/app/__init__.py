@@ -15,32 +15,41 @@ import os
 mongo = PyMongo()
 jwt = JWTManager()
 bcrypt = Bcrypt()
-# Rate limiter disabled - was causing issues on Render deployment
-# Bonus feature, not core requirement
-limiter = Limiter(key_func=get_remote_address, enabled=False)
 
 def create_app():
     """Application factory pattern for Flask."""
     flask_app = Flask(__name__)
     
-    # Configuration
-    flask_app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
+    # --- MongoDB Configuration ---
+    # We use explicit connection pooling and strict timeouts to prevent "Network Errors"
+    # on the mobile client. By timing out the DB request earlier than the client's timeout,
+    # we can return a proper JSON error response.
+    mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
     
-    # Append SSL and timeout options if they aren't present (critical for Render/Atlas)
-    if '?' not in flask_app.config['MONGO_URI']:
-        flask_app.config['MONGO_URI'] += "?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
-    else:
-        flask_app.config['MONGO_URI'] += "&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
+    # Connection Pool Settings
+    params = [
+        "maxPoolSize=10",
+        "minPoolSize=1",
+        "connectTimeoutMS=10000",        # 10s to connect
+        "serverSelectionTimeoutMS=5000",   # 5s to find node
+        "socketTimeoutMS=20000",         # 20s for socket ops
+        "retryWrites=true",
+        "w=majority",
+        "tlsAllowInvalidCertificates=true" # Often needed for Render/Atlas connection
+    ]
+    
+    separator = '&' if '?' in mongo_uri else '?'
+    flask_app.config['MONGO_URI'] = f"{mongo_uri}{separator}{'&'.join(params)}"
+    
     flask_app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
     flask_app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
-    flask_app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
-    flask_app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days for refresh token
+    flask_app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour
+    flask_app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 2592000 # 30 days
     
     # Initialize extensions with app
     mongo.init_app(flask_app)
     jwt.init_app(flask_app)
     bcrypt.init_app(flask_app)
-    limiter.init_app(flask_app)
     CORS(flask_app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
@@ -50,25 +59,45 @@ def create_app():
     flask_app.register_blueprint(auth_bp, url_prefix='/api/auth')
     flask_app.register_blueprint(video_bp, url_prefix='/api/video')
     
-    # Global Error Handler
+    # --- Comprehensive Global Error Handler ---
     @flask_app.errorhandler(Exception)
     def handle_exception(e):
         import traceback
         tb = traceback.format_exc()
-        # pass through HTTP errors
+        
+        # Handle Mongo Specific Errors
+        if "ServerSelectionTimeoutError" in str(e) or "ConnectionFailure" in str(e):
+            return jsonify({
+                'success': False, 
+                'message': 'Database connection error. Please try again in a few moments.',
+                'error_type': 'DatabaseTimeout'
+            }), 503
+            
+        # pass through HTTP errors (like 404, 405)
         if hasattr(e, 'code'):
-            return jsonify({'success': False, 'message': str(e), 'code': e.code, 'traceback': tb}), e.code
-        # now you're handling non-HTTP exceptions only
-        return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__, 'traceback': tb}), 500
+            return jsonify({
+                'success': False, 
+                'message': str(e), 
+                'code': e.code,
+                'traceback': tb if flask_app.debug else None
+            }), e.code
+            
+        # fallback for all other internal errors
+        return jsonify({
+            'success': False, 
+            'message': f"Internal Server Error: {str(e)}", 
+            'type': type(e).__name__, 
+            'traceback': tb if flask_app.debug else None
+        }), 500
 
     # Root route
     @flask_app.route('/')
     def index():
-        return "Backend is Live - Version 1.0.5"
+        return "Backend is Live - Version 1.0.6"
 
     # Health check endpoint
     @flask_app.route('/api/health')
     def health_check():
-        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.5'}
+        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.6'}
     
     return flask_app
