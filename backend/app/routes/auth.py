@@ -3,7 +3,7 @@ Authentication Routes
 Handles user registration, login, profile, and logout.
 All passwords are hashed using bcrypt before storage.
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -68,7 +68,7 @@ def signup():
         )), 201
         
     except Exception as e:
-        app.logger.error(f"Signup error: {str(e)}")
+        current_app.logger.error(f"Signup error: {str(e)}")
         return jsonify(format_response(
             False,
             message=f'An error occurred during registration: {type(e).__name__}',
@@ -123,7 +123,7 @@ def login():
         )), 200
         
     except Exception as e:
-        app.logger.error(f"Login error: {str(e)}")
+        current_app.logger.error(f"Login error: {str(e)}")
         return jsonify(format_response(
             False,
             message=f'An error occurred during login: {type(e).__name__}',
