@@ -15,9 +15,14 @@ import os
 mongo = PyMongo()
 jwt = JWTManager()
 bcrypt = Bcrypt()
-# limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
-# Re-enabled rate limiter for production - protects auth endpoints
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "100 per hour"])
+# Rate limiter with memory storage - swallow_errors allows requests through if limiter fails
+# This is safe for production as it degrades gracefully
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["300 per day", "100 per hour"],
+    storage_uri="memory://",
+    swallow_errors=True  # If limiter fails, allow request through instead of crashing
+)
 
 def create_app():
     """Application factory pattern for Flask."""
@@ -64,11 +69,11 @@ def create_app():
     # Root route
     @flask_app.route('/')
     def index():
-        return "Backend is Live - Version 1.0.3"
+        return \"Backend is Live - Version 1.0.4\"
 
     # Health check endpoint
     @flask_app.route('/api/health')
     def health_check():
-        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.3'}
+        return {'status': 'healthy', 'message': 'API is running', 'version': '1.0.4'}
     
     return flask_app
