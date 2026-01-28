@@ -68,9 +68,10 @@ def signup():
         )), 201
         
     except Exception as e:
+        app.logger.error(f"Signup error: {str(e)}")
         return jsonify(format_response(
             False,
-            message='An error occurred during registration',
+            message=f'An error occurred during registration: {type(e).__name__}',
             errors=[str(e)]
         )), 500
 
@@ -122,9 +123,10 @@ def login():
         )), 200
         
     except Exception as e:
+        app.logger.error(f"Login error: {str(e)}")
         return jsonify(format_response(
             False,
-            message='An error occurred during login',
+            message=f'An error occurred during login: {type(e).__name__}',
             errors=[str(e)]
         )), 500
 

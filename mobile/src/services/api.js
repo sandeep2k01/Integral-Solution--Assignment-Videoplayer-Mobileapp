@@ -17,7 +17,7 @@ const API_BASE_URL = 'https://integral-solution-assignment-videoplayer.onrender.
 // Create axios instance
 const api = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 10000,
+    timeout: 30000, // Increased to 30s to allow for Render cold start/DB timeouts
     headers: {
         'Content-Type': 'application/json',
     },
