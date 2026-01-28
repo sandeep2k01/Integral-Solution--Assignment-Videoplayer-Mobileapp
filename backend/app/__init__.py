@@ -25,6 +25,12 @@ def create_app():
     
     # Configuration
     flask_app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/video_app')
+    
+    # Append SSL and timeout options if they aren't present (critical for Render/Atlas)
+    if '?' not in flask_app.config['MONGO_URI']:
+        flask_app.config['MONGO_URI'] += "?serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
+    else:
+        flask_app.config['MONGO_URI'] += "&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&tlsAllowInvalidCertificates=true"
     flask_app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
     flask_app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-flask-secret')
     flask_app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 hour for access token
