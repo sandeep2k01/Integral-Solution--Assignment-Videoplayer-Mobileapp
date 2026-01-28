@@ -53,6 +53,11 @@ def create_app():
         # now you're handling non-HTTP exceptions only
         return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__}), 500
 
+    # Root route
+    @app.route('/')
+    def index():
+        return "Backend is Live - Version 1.0.2"
+
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
