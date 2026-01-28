@@ -47,11 +47,13 @@ def create_app():
     # Global Error Handler
     @app.errorhandler(Exception)
     def handle_exception(e):
+        import traceback
+        tb = traceback.format_exc()
         # pass through HTTP errors
         if hasattr(e, 'code'):
-            return jsonify({'success': False, 'message': str(e), 'code': e.code}), e.code
+            return jsonify({'success': False, 'message': str(e), 'code': e.code, 'traceback': tb}), e.code
         # now you're handling non-HTTP exceptions only
-        return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__}), 500
+        return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__, 'traceback': tb}), 500
 
     # Root route
     @app.route('/')
