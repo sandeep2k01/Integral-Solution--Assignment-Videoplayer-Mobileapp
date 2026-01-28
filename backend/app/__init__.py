@@ -2,7 +2,7 @@
 Flask Application Factory
 Creates and configures the Flask app with all extensions and blueprints.
 """
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
@@ -49,6 +49,15 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(video_bp, url_prefix='/api/video')
     
+    # Global Error Handler
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # pass through HTTP errors
+        if hasattr(e, 'code'):
+            return jsonify({'success': False, 'message': str(e), 'code': e.code}), e.code
+        # now you're handling non-HTTP exceptions only
+        return jsonify({'success': False, 'message': f"Internal Server Error: {str(e)}", 'type': type(e).__name__}), 500
+
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
