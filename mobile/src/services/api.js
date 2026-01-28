@@ -8,10 +8,8 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Configuration
-// For mobile device/emulator testing, use your machine's local network IP
-// Run 'ipconfig' and look for IPv4 Address (e.g., 192.168.1.x)
-const API_BASE_URL = 'http://192.168.40.147:5000/api';
+// Production Render Backend
+const API_BASE_URL = 'https://integral-solution-assignment-videoplayer.onrender.com/api';
 
 
 
