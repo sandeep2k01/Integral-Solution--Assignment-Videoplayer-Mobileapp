@@ -15,7 +15,9 @@ import os
 mongo = PyMongo()
 jwt = JWTManager()
 bcrypt = Bcrypt()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+# limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+# Disabling limiter temporarily for production stability
+limiter = Limiter(key_func=get_remote_address, enabled=False)
 
 def create_app():
     """Application factory pattern for Flask."""
